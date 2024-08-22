@@ -12,3 +12,4 @@ sled = "0.34.7"
 [profile.release]
 lto = true
 opt-level = "z"
+strip = "symbols"
