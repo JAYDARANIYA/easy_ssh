@@ -55,6 +55,16 @@ fn main() {
                         .index(1),
                 ),
         )
+        .subcommand(
+            Command::new("print")
+                .about("Print the SSH command for a registered server")
+                .arg(
+                    Arg::new("server-name")
+                        .help("The name of the server")
+                        .required(true)
+                        .index(1),
+                ),
+        )
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("register") {
@@ -117,6 +127,21 @@ fn main() {
             Ok(_) => println!("Server removed successfully"),
             Err(e) => println!("Failed to remove server: {}", e),
         }
+    }
+
+    if let Some(matches) = matches.subcommand_matches("print") {
+        let server_name = matches.get_one::<String>("server-name").unwrap();
+        let manager = SledManager::default();
+        let server = match manager.get_server(server_name) {
+            Ok(Some(server)) => server,
+            _ => {
+                println!("Server not found");
+                std::process::exit(1); // Exit with a non-zero status code
+            }
+        };
+
+        // Print the SSH command
+        println!("ssh -i '{}' '{}'", server.key_path, server.user_ip);
     }
 }
 
